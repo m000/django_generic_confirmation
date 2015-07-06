@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.query import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from generic_confirmation.fields import PickledObjectField
+from fields import PickledObjectField
 
 
 class ConfirmationManager(models.Manager):

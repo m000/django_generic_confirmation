@@ -1,9 +1,9 @@
 import random
+import signals
 from django import forms
 from django.db import models
-from generic_confirmation.models import DeferredAction
-from generic_confirmation.main import LONG
-from generic_confirmation import signals
+from models import DeferredAction
+from main import LONG
 
 
 
