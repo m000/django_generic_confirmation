@@ -59,7 +59,7 @@ class DeferredAction(models.Model):
             form = form_class(
                 self.form_input, instance=self.instance_object,
                 prefix=self.form_prefix)
-
+        print form.data['zip_code']
         return form
 
     def resume_form_save(self, commit=True):
