@@ -2,6 +2,7 @@
 """Unit testing for django-generic-confirmation."""
 
 import time
+import datetime
 from django import forms
 from django.utils import timezone
 from django.test import TestCase
@@ -167,7 +168,7 @@ class DeferFormTestCase(TestCase):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
 
-        valid_date = timezone.now()+timezone.timedelta(hours=1)
+        valid_date = datetime.datetime.now()+timezone.timedelta(hours=1)
         defered = form.save(valid_until=valid_date)
 
         obj = DeferredAction.objects.get(token=defered)
@@ -181,7 +182,7 @@ class DeferFormTestCase(TestCase):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
 
-        valid_date = timezone.now() - timezone.timedelta(hours=1)
+        valid_date = datetime.datetime.now() - timezone.timedelta(hours=1)
         defered = form.save(valid_until=valid_date)
 
         result = DeferredAction.objects.confirm(defered)
@@ -336,7 +337,7 @@ class TemplatetagTestCase(TestCase):
         # generate a Token
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user7)
         self.assertTrue(form.is_valid())
-        valid_date = timezone.now() - timezone.timedelta(hours=1)
+        valid_date = datetime.datetime.now() - timezone.timedelta(hours=1)
         defered = form.save(valid_until=valid_date)
         #self.assertEquals(DeferredAction.objects.pending_for(self.user7), 0)
 
