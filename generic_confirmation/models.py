@@ -35,8 +35,8 @@ class DeferredAction(models.Model):
     valid_until = models.DateTimeField(null=True)
     confirmed = models.BooleanField(default=False)
     declined = models.BooleanField(default=False)
-    requested_by = models.ForeignKey(User, null=True, blank=True)
-    reviewed_by = models.ForeignKey(User, null=True, blank=True)
+    requested_by = models.ForeignKey(User, null=True, blank=True, related_name='requested_by')
+    reviewed_by = models.ForeignKey(User, null=True, blank=True, related_name='reviewed_by')
     created_at = models.DateTimeField(auto_now_add=True)
 
     form_class = models.CharField(max_length=255)
