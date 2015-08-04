@@ -60,6 +60,8 @@ class DeferredFormMixIn(object):
         if valid_until is not None:
             data.update({'valid_until': valid_until})
         defer = DeferredAction.objects.create(**data)
+        if user is not None:
+            defer.requested_by = user
 
         if self.instance is not None:
             # this extra step makes sure that ModelForms for editing and for
