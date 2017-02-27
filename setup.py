@@ -22,4 +22,7 @@ setup(
         'Topic :: Utilities',
         'Framework :: Django',
     ),
+    install_requires=[
+        'django-picklefield',
+    ],
 )

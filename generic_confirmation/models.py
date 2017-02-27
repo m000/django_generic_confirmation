@@ -2,7 +2,12 @@ import datetime
 from django.db import models
 from django.db.models.query import Q
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+try:
+    # Django >= 1.8
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    # Django <= 1.7
+    from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.auth.models import User
 from picklefield.fields import PickledObjectField
 
@@ -45,7 +50,7 @@ class DeferredAction(models.Model):
 
     content_type = models.ForeignKey(ContentType, null=True)
     object_pk = models.TextField(null=True)
-    instance_object = generic.GenericForeignKey('content_type', 'object_pk')
+    instance_object = GenericForeignKey('content_type', 'object_pk')
 
     objects = ConfirmationManager()
 
