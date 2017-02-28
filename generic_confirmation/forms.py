@@ -1,9 +1,9 @@
 import random
-import signals
+from . import signals
 from django import forms
 from django.db import models
-from models import DeferredAction
-from main import LONG
+from .models import DeferredAction
+from .main import LONG
 
 
 
