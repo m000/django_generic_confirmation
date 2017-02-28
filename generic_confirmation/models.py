@@ -75,7 +75,7 @@ class DeferredAction(models.Model):
 
         if not form.is_valid():
             raise Exception(
-                "the defered form was not cleaned properly before saving")
+                "the deferred form was not cleaned properly before saving")
 
         obj = form.save_original(commit=commit)
         if commit:

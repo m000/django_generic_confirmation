@@ -65,7 +65,7 @@ class TokenGeneratorTestCase(TestCase):
     def testCollision(self):
         form1 = TokenTestForm({'email': 'xxx@example.com'}, instance=self.user1)
         self.assertTrue(form1.is_valid())
-        defered1 = form1.save()
+        deferred1 = form1.save()
 
         form2 = TokenTestForm({'email': 'yyy@example.com'}, instance=self.user2)
         self.assertTrue(form2.is_valid())
@@ -81,8 +81,8 @@ class DeferFormTestCase(TestCase):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
 
-        defered = form.save()
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), LONG[1])
         # refetch user-object from db before checking the email,
         # because django objects don't reflect db changes done
         # elsewhere
@@ -90,10 +90,10 @@ class DeferFormTestCase(TestCase):
         self.assertEquals(user_obj.email, 'user1@example.com')
 
         # ========================
-        # in practice this is the boundary, where code excution will be defered.
+        # in practice this is the boundary, where code excution will be deferred.
         # ========================
 
-        obj = DeferredAction.objects.confirm(token=defered)
+        obj = DeferredAction.objects.confirm(token=deferred)
         #x = obj.resume_form_save()
 
         # refetch user-object from db before checking the email,
@@ -106,16 +106,16 @@ class DeferFormTestCase(TestCase):
     def testUserCreation(self):
         form = UserCreateForm({'username': 'user2', 'email': 'user2@example.com', 'password': '123456'})
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), SHORT_UPPER[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), SHORT_UPPER[1])
         # at this point the object must not exist.
         self.assertRaises(User.DoesNotExist, User.objects.get, username='user2')
 
         # ========================
-        # in practice this is the boundary, where code excution will be defered.
+        # in practice this is the boundary, where code excution will be deferred.
         # ========================
 
-        obj = DeferredAction.objects.confirm(token=defered)
+        obj = DeferredAction.objects.confirm(token=deferred)
         #x = obj.resume_form_save()
 
         # refetch user-object from db before checking the email,
@@ -129,8 +129,8 @@ class DeferFormTestCase(TestCase):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
 
-        defered = form.save()
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), LONG[1])
 
         # refetch user-object from db before checking the email,
         # because django objects don't reflect db changes done
@@ -139,10 +139,10 @@ class DeferFormTestCase(TestCase):
         self.assertEquals(user_obj.email, 'user1@example.com')
 
         # ========================
-        # in practice this is the boundary, where code excution will be defered.
+        # in practice this is the boundary, where code excution will be deferred.
         # ========================
 
-        confirm_form = ConfirmationForm({'token': defered})
+        confirm_form = ConfirmationForm({'token': deferred})
         self.assertTrue(confirm_form.is_valid())
         obj = confirm_form.save()
         self.assertNotEqual(obj, False)
@@ -169,9 +169,9 @@ class DeferFormTestCase(TestCase):
         self.assertTrue(form.is_valid())
 
         valid_date = datetime.datetime.now()+timezone.timedelta(hours=1)
-        defered = form.save(valid_until=valid_date)
+        deferred = form.save(valid_until=valid_date)
 
-        obj = DeferredAction.objects.get(token=defered)
+        obj = DeferredAction.objects.get(token=deferred)
 
         # the token must be valid until ``valid_date``
         self.assertEquals(obj.valid_until, valid_date)
@@ -183,9 +183,9 @@ class DeferFormTestCase(TestCase):
         self.assertTrue(form.is_valid())
 
         valid_date = datetime.datetime.now() - timezone.timedelta(hours=1)
-        defered = form.save(valid_until=valid_date)
+        deferred = form.save(valid_until=valid_date)
 
-        result = DeferredAction.objects.confirm(defered)
+        result = DeferredAction.objects.confirm(deferred)
         self.assertEquals(result, False)
 
 
@@ -200,8 +200,8 @@ class ManyToManyTestCase(TestCase):
         form = GroupChangeForm({'groups': [self.group1.pk, self.group2.pk]}, instance=self.user)
         self.assertTrue(form.is_valid())
 
-        defered = form.save()
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), LONG[1])
 
         # refetch user-object from db before checking the email,
         # because django objects don't reflect db changes done
@@ -210,10 +210,10 @@ class ManyToManyTestCase(TestCase):
         self.assertEquals(list(user_obj.groups.all()), [])
 
         # ========================
-        # in practice this is the boundary, where code excution will be defered.
+        # in practice this is the boundary, where code excution will be deferred.
         # ========================
 
-        obj = DeferredAction.objects.confirm(token=defered)
+        obj = DeferredAction.objects.confirm(token=deferred)
         #x = obj.resume_form_save()
 
         # refetch user-object from db before checking the email,
@@ -239,13 +239,13 @@ class SignalTestCase(TestCase):
         # just triggr a confirmation request by changing the email
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), LONG[1])
 
         form = GroupNameChangeForm({'name': 'new_name'}, instance=self.group)
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), SHORT[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), SHORT[1])
 
     def testClassOnlyListener(self):
 
@@ -259,13 +259,13 @@ class SignalTestCase(TestCase):
         # just triggr a confirmation request by changing the email
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), LONG[1])
 
         form = GroupNameChangeForm({'name': 'new_name'}, instance=self.group)
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), SHORT[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), SHORT[1])
 
 
     def testUserPassing(self):
@@ -279,8 +279,8 @@ class SignalTestCase(TestCase):
         # just triggr a confirmation request by changing the email
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user)
         self.assertTrue(form.is_valid())
-        defered = form.save(self.user)
-        self.assertEquals(len(defered), LONG[1])
+        deferred = form.save(self.user)
+        self.assertEquals(len(deferred), LONG[1])
 
     def testNoUser(self):
         def dummy_listener(sender, instance, user, testcase=self, **kwargs):
@@ -292,8 +292,8 @@ class SignalTestCase(TestCase):
 
         form = GroupNameChangeForm({'name': 'new_name'}, instance=self.group)
         self.assertTrue(form.is_valid())
-        defered = form.save()
-        self.assertEquals(len(defered), SHORT[1])
+        deferred = form.save()
+        self.assertEquals(len(deferred), SHORT[1])
 
 class NotificationTestCase(TestCase):
     def setUp(self):
@@ -320,7 +320,7 @@ class TemplatetagTestCase(TestCase):
         # generate a Token
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user5)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         #self.assertEquals(DeferredAction.objects.pending_for(self.user5), 1)
 
         t = Template("""{% load generic_confirmation_tags %}{% pending_confirmations object %}""")
@@ -338,7 +338,7 @@ class TemplatetagTestCase(TestCase):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user7)
         self.assertTrue(form.is_valid())
         valid_date = datetime.datetime.now() - timezone.timedelta(hours=1)
-        defered = form.save(valid_until=valid_date)
+        deferred = form.save(valid_until=valid_date)
         #self.assertEquals(DeferredAction.objects.pending_for(self.user7), 0)
 
         t = Template("""{% load generic_confirmation_tags %}{% pending_confirmations object %}""")
@@ -368,36 +368,36 @@ class ViewTestCase(TestCase):
     def testValidConfirmByGet(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user8)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        self.assertRaises(TemplateDoesNotExist, self.client.get ,reverse('generic_confirmation_by_get', kwargs={'token': defered}))
+        self.assertRaises(TemplateDoesNotExist, self.client.get ,reverse('generic_confirmation_by_get', kwargs={'token': deferred}))
 
     def testValidConfirmByGetWithCustomSuccessMessage(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user8)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        self.assertRaises(TemplateDoesNotExist, self.client.get ,reverse('generic_confirmation_by_get_with_message', kwargs={'token': defered}))
+        self.assertRaises(TemplateDoesNotExist, self.client.get ,reverse('generic_confirmation_by_get_with_message', kwargs={'token': deferred}))
 
     def testValidConfirmByGetWithCustomSuccessUrl(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user8)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        response = self.client.get(reverse('generic_confirmation_by_get_with_url', kwargs={'token': defered}))
+        response = self.client.get(reverse('generic_confirmation_by_get_with_url', kwargs={'token': deferred}))
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/success/')
 
     def testValidConfirmByGetWithCustomSuccessUrlAndMessage(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user8)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        response = self.client.get(reverse('generic_confirmation_by_get_with_url_and_message', kwargs={'token': defered}))
+        response = self.client.get(reverse('generic_confirmation_by_get_with_url_and_message', kwargs={'token': deferred}))
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/success/')
 
@@ -415,36 +415,36 @@ class ViewTestCase(TestCase):
     def testValidConfirmByFormPOST(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user9)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        self.assertRaises(TemplateDoesNotExist, self.client.post ,reverse('generic_confirmation_by_form'), {'token': defered,})
+        self.assertRaises(TemplateDoesNotExist, self.client.post ,reverse('generic_confirmation_by_form'), {'token': deferred,})
 
     def testValidConfirmByFormPOSTWithCustomSuccessMessage(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user9)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        self.assertRaises(TemplateDoesNotExist, self.client.post ,reverse('generic_confirmation_by_form_with_message'), {'token': defered})
+        self.assertRaises(TemplateDoesNotExist, self.client.post ,reverse('generic_confirmation_by_form_with_message'), {'token': deferred})
 
     def testValidConfirmByFormPOSTWithCustomSuccessUrl(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user9)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        response = self.client.post(reverse('generic_confirmation_by_form_with_url'), {'token': defered})
+        response = self.client.post(reverse('generic_confirmation_by_form_with_url'), {'token': deferred})
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/success/')
 
     def testValidConfirmByFormPOSTWithCustomSuccessUrlAndMessage(self):
         form = EmailChangeForm({'email': 'xxx@example.com'}, instance=self.user9)
         self.assertTrue(form.is_valid())
-        defered = form.save()
+        deferred = form.save()
         # currently there is no bundled template
         # should be fixed in a future version
-        response = self.client.post(reverse('generic_confirmation_by_form_with_url_and_message'), {'token': defered})
+        response = self.client.post(reverse('generic_confirmation_by_form_with_url_and_message'), {'token': deferred})
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response['Location'], 'http://testserver/success/')
 

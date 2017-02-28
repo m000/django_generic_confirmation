@@ -97,7 +97,7 @@ class ConfirmationForm(forms.Form):
     """
     Form to use in views to confirm an action with a token.
     Makes sure the token exists and on calling ``save()``
-    will resume the defered action.
+    will resume the deferred action.
 
     """
     token = forms.CharField(required=True)
