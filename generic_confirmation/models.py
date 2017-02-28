@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 from django.db import models
 from django.db.models.query import Q
 from django.contrib.contenttypes.models import ContentType
@@ -29,7 +29,7 @@ class ConfirmationManager(models.Manager):
 
     def pending_for(self, instance):
         ct = ContentType.objects.get_for_model(instance)
-        now = datetime.datetime.now()
+        now = timezone.now()
         return self.exclude(confirmed=True).exclude(declined=True).filter(content_type=ct,
                 object_pk=instance.pk).filter(
                 Q(valid_until__gt=now) | Q(valid_until__isnull=True)).count()
@@ -85,6 +85,6 @@ class DeferredAction(models.Model):
     def is_expired(self):
         if self.valid_until is None:
             return False
-        now = datetime.datetime.now()
+        now = timezone.now()
         return self.valid_until < now
     is_expired.boolean = True
