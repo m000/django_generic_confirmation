@@ -70,9 +70,9 @@ class DeferredFormMixIn(object):
             defer.save()
 
         # inform anyone else that confirmation is requested
-        signals.confirmation_required.send(sender=self._meta.model,
-                                        instance=defer, user=user)
+        signals.confirmation_required.send(sender=self._meta.model, instance=defer, user=user)
 
+        # call form notification callback
         if hasattr(self, 'send_notification') and callable(self.send_notification):
             self.send_notification(user, instance=defer)
 
@@ -82,7 +82,16 @@ class DeferredFormMixIn(object):
         """
         triggr the original ModelForm save
         """
-        return forms.ModelForm.save(self, *args, **kwargs)
+        instance = forms.ModelForm.save(self, *args, **kwargs)
+
+        # inform anyone else that a confirmation happened
+        signals.confirmation_occured.send(sender=self._meta.model, instance=instance)
+
+        # call form acknowledgement callback
+        if hasattr(self, 'send_acknowledgement') and callable(self.send_acknowledgement):
+            self.send_acknowledgement(instance=instance)
+
+        return instance
 
 
 class DeferredForm(DeferredFormMixIn, forms.ModelForm):
