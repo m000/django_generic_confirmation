@@ -3,17 +3,21 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from .forms import ConfirmationForm
 
-def confirm(request, token, template_name='confirm.html', success_template_name='confirmed.html',
-                    success_url=None, success_message=None, form_class=ConfirmationForm):
+def confirm(request, token, template='confirm.html', success_message=None, success_url=None, form_class=ConfirmationForm):
     '''
-    If ``success_url`` is not None a redirect to ``success_url`` will
-    be issued, once the entered confirmation code was confirmed successfully.
-    Optionally, of ``success_message`` is not None, it will be set via
-    Django's message system.
+    If a valid token is provided (either through the url or through POST data),
+    the following will happen:
+        - If ``success_url`` is not provided, ``template`` will be rendered,
+          having ``instance`` and (optionally) ``success_message`` set in
+          its context.
+          The former can be used to determine if a confirmation took place,
+          or the user is returning to the url.
+        - If ``success_url`` is provided, a redirection to it will happen
+          and (optionally) ``success_message`` will be sent via the django
+          messaging framework.
 
-    If ``success_url`` is None the template ``success_template_name`` will
-    be rendered once the confirmation is complete. The ``success_message``
-    will then be added to the template context instead of the message_set.
+    If a valid token is not provided, then ``template`` will be rendered,
+    having only ``form`` in its context.
     '''
     if request.method == 'POST':
         # get token from POST
@@ -24,12 +28,12 @@ def confirm(request, token, template_name='confirm.html', success_template_name=
     else:
         # no token provided - just render the form
         form = form_class()
-        return render_to_response(template_name, context=RequestContext(request, {'form': form}))
+        return render_to_response(template, context=RequestContext(request, {'form': form}))
 
     if form.is_valid():
         instance = form.save()
         if success_url is None:
-            return render_to_response(success_template_name, context=RequestContext(request, {
+            return render_to_response(template, context=RequestContext(request, {
                 'success_message': success_message,
                 'instance': instance,
             }))
@@ -38,4 +42,4 @@ def confirm(request, token, template_name='confirm.html', success_template_name=
                 request.user.message_set.create(message=success_message)
             return HttpResponseRedirect(success_url)
     else:
-        return render_to_response(template_name, context=RequestContext(request, {'form': form}))
+        return render_to_response(template, context=RequestContext(request, {'form': form}))
