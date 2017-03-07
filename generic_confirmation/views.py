@@ -2,6 +2,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 from .forms import ConfirmationForm
+from .models import DeferredValidationError
 
 def confirm(request, token, template='confirm.html', success_message=None, success_url=None, form_class=ConfirmationForm):
     '''
@@ -31,10 +32,19 @@ def confirm(request, token, template='confirm.html', success_message=None, succe
         return render_to_response(template, context=RequestContext(request, {'form': form}))
 
     if form.is_valid():
-        instance = form.save()
+        try:
+            instance = form.save()
+        except DeferredValidationError:
+            return render_to_response(template, context=RequestContext(request, {
+                ### fix this
+                'success': False,
+                'message': 'le poul',
+                'exception': None,
+            }))
         if success_url is None:
             return render_to_response(template, context=RequestContext(request, {
-                'success_message': success_message,
+                'success': True,
+                'message': success_message,
                 'instance': instance,
             }))
         else:

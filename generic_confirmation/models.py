@@ -8,9 +8,12 @@ try:
 except ImportError:
     # Django <= 1.7
     from django.contrib.contenttypes.generic import GenericForeignKey
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from picklefield.fields import PickledObjectField
 
+class DeferredValidationError(ValidationError):
+    pass
 
 class ConfirmationManager(models.Manager):
     def confirm(self, token):
@@ -74,8 +77,7 @@ class DeferredAction(models.Model):
         form = self.get_resume_form()
 
         if not form.is_valid():
-            raise Exception(
-                "the deferred form was not cleaned properly before saving")
+            raise DeferredValidationError('Saved form data no longer valid.')
 
         obj = form.save_original(commit=commit)
         if commit:
